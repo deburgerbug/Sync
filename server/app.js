@@ -3,12 +3,16 @@ import express from 'express';
 import cors from 'cors'
 import errorHandler from './src/middlewares/errorHandler.js'
 import authRoutes from './src/routes/auth.routes.js'
+import workspaceRoutes from './src/routes/workspace.routes.js'
+import boardRoutes from './src/routes/board.routes.js'
 
 const app = express()
 app.use(cors())
 app.use(express.json())
-app.use('/api/auth', authRoutes);
 
+app.use('/api/auth', authRoutes);
+app.use('/api/workspaces', workspaceRoutes)
+app.use('/api/boards', boardRoutes)
 app.get('/health', (req, res)=>{
     res.json({status: 'ok'})
 })

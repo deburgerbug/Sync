@@ -4,7 +4,7 @@ import * as userRepository from '../repositories/user.repository.js';
 import AppError from '../utils/AppError.js'
 
 const generateToken = (userId) => {
-    return jwt.sign({ userId }, process.env.JWT_SECRET, { expiresIn: '7d' })
+    return jwt.sign({ userId }, process.env.JWT_SECRET, { expiresIn: '1h' })
 };
 
 export const registerUser = async ({ name, email, password }) => {
