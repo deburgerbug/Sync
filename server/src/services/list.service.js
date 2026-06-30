@@ -5,7 +5,7 @@ import * as workspaceService from './workspace.service.js'
 import AppError from '../utils/AppError.js'
 
 export const createList = async({ title, boardId, userId}) =>{
-    const board = await boardRepository.findBoardById(boardId)
+    const board = await boardRepository.findBoardById(boardId, userId)
     
     if (!board){
         throw new AppError('Board not found', 404)
@@ -14,7 +14,7 @@ export const createList = async({ title, boardId, userId}) =>{
     await workspaceService.verifyMembership(userId, board.workspaceId);
     const position = await listRepository.countListByBoardId(boardId);
     return listRepository.createList({ title, boardId, position});
-}
+}   
 
 export const getListsByBoard = async({ boardId, userId}) =>{
     const board = await boardService.getBoardById({ boardId, userId })
@@ -29,6 +29,6 @@ export const getListById = async(listId, userId) =>{
         throw new AppError('List not found', 404)
     }
     const board = await boardService.getBoardById({ boardId: list.boardId, userId })
-    
     await workspaceService.verifyMembership(userId, board.workspaceId)
+    return list;
 };
