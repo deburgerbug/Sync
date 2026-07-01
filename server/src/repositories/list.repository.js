@@ -9,7 +9,7 @@ export const findListByBoardId = (boardId) =>{
 }
 export const findListById = (id) =>{
     return prisma.list.findUnique({
-        where: {id},
+        where: { id },
     });
 };
 

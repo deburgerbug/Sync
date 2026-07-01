@@ -22,8 +22,8 @@ export const getListsByBoard = async({ boardId, userId}) =>{
     return listRepository.findListByBoardId(boardId);
 }
 
-export const getListById = async(listId, userId) =>{
-    const list = await listRepository.findListById(listId);      
+export const getListById = async({ listId, userId }) =>{
+    const list = await listRepository.findListById(listId);
 
     if(!list){
         throw new AppError('List not found', 404)
