@@ -25,14 +25,16 @@ export const createCard = async ({title, description, listId, userId}) => {
 }
 
 export const getCardById = async({cardId, userId}) =>{
-    const card = await cardRepository.findCardByListId(cardId);
+    // find the card by its unique id
+    const card = await cardRepository.findCardById(cardId);
     if(!card){
         throw new AppError('Card not found', 404)
     }
 
-    const list = await listRepository.findListById(listId)
+    // get the list and board via the card
+    const list = await listRepository.findListById(card.listId)
     const board = await boardService.getBoardById({
-        boardId:board.listId, 
+        boardId: list.boardId,
         userId
     })
     await workspaceService.verifyMembership(userId, board.workspaceId)
@@ -40,7 +42,8 @@ export const getCardById = async({cardId, userId}) =>{
 }
 
 export const getCardByListId = async({ listId, userId}) =>{
-    const list = await listRepository.findListById( card.listId);
+    // verify list exists
+    const list = await listRepository.findListById(listId);
 
     if(!list) {
         throw new AppError('List not found', 404)
