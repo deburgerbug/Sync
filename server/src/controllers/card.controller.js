@@ -2,7 +2,7 @@ import * as cardService from '../services/card.service.js'
 import {createCardSchema} from '../validators/card.validator.js'
 export const createCard = async(req, res, next ) =>{
     try{
-        const { title, description, listId } =  createListSchema.parse(req.body)
+        const { title, description, listId } =  createCardSchema.parse(req.body)
         const card = await cardService.createCard({title, description, listId, userId: req.user.id})
         res.status(201).json({
             success: true,
