@@ -4,6 +4,9 @@ export const createCard = async(req, res, next ) =>{
     try{
         const { title, description, listId } =  createCardSchema.parse(req.body)
         const card = await cardService.createCard({title, description, listId, userId: req.user.id})
+
+        const io = req.app.get('io')
+        io.to(card.list.boardId).emit('card:created', { card })
         res.status(201).json({
             success: true,
             data: card

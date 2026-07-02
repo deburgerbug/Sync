@@ -5,6 +5,10 @@ export const createList = async(req, res, next) =>{
     try{
         const { title, boardId } = createListSchema.parse(req.body);
         const list = await listService.createList({title, boardId, userId: req.user.id})
+
+        const io = req.app.get('io');
+        io.to(list.boardId).emit('list:created', {list})
+        
         res.status(201).json({
             success: true,
             data: list
