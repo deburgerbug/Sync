@@ -1,8 +1,8 @@
 import { io } from 'socket.io-client'
 
-const TOKEN = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI4ZTFlNTc4YS03NjUwLTQzYWUtYmI1Yy1iMTI3NGJjOWZmMDkiLCJpYXQiOjE3ODMwMTE0MDcsImV4cCI6MTc4MzAxNTAwN30.3gW5WLh7K00yhU1Z2DRdJKI2YSP-zUpVAkRDwQwB60c';
+const TOKEN = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2ZDBiMTJmNi1jMTBhLTQ5NmUtODY3MS04MmM4YWY2N2Q2MjkiLCJpYXQiOjE3ODMxNzk3OTEsImV4cCI6MTc4MzE4MzM5MX0.yGIENE0f33RSEBnFmoD0CWvTEsu55KG0zFphmj_fNEI'
 
-const BOARD_ID = '5b82fbc1-a1c9-4a22-94a1-7cb063c7fe0';
+const BOARD_ID = 'e2991ecb-941f-49a1-b3e5-c25661991619';
 
 const socket = io('http://localhost:5000', {
     auth: {token: TOKEN,},reconnection: false,
@@ -11,7 +11,7 @@ socket.on('connect', () =>{
     console.log('Connected socket ID:', socket.id)
 
     //join a board room
-    socket.emit('board:join', {BOARD_ID});
+    socket.emit('board:join', {boardId :BOARD_ID});
     console.log('JOining board room:', BOARD_ID)
 });
 

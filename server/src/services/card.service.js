@@ -21,7 +21,8 @@ export const createCard = async ({title, description, listId, userId}) => {
     //verify workspace membership
     await workspaceService.verifyMembership( userId, board.workspaceId)
     const position = await cardRepository.countCardByListId( listId)
-    return cardRepository.createCard( {title, description, listId, position})
+    const card = await cardRepository.createCard( {title, description, listId, position})
+    return card;
 }
 
 export const getCardById = async({cardId, userId}) =>{
