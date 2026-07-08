@@ -1,4 +1,4 @@
-import axios from 'axios'
+import axios, {create} from 'axios'
 
 const api = axios.create({
     baseURL: 'http://localhost:5000/api'
@@ -6,10 +6,10 @@ const api = axios.create({
 
 //Attach JWT token to every request automatically
 
-api.interceptore.request.use((config) =>{
+api.interceptors.request.use((config) =>{
     const token = localStorage.getItem('token');
     if(token){
-        config.headers.Authorixation = `Bearer ${token}`;
+        config.headers.Authorization = `Bearer ${token}`;
     }
     return config;
 });
