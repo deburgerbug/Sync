@@ -63,3 +63,24 @@ export const getCardById = async(req, res, next) =>{
         next(err);
     }
 };
+export const moveCard = async(req,res,next) =>{
+    try{
+        const {cardId} = req.params;
+        const {listId, position} = req.body
+
+        const card = await cardService.moveCard({
+            cardId, 
+            listId,
+            position,
+            userId: req.user.id
+        });
+
+        const io = req.app.get('io');
+        io.to(card.list.boardId).emit('card:moved',{
+            cardId, listId, position, boardId:card.list.boardId
+        });
+        res.status(200).json({ success:true, data:card});
+    }catch(err){
+        next(err)
+    }
+}

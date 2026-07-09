@@ -37,3 +37,13 @@ export const deleteCard = (id) => {
 export const countCardByListId = (listId) => {
     return prisma.card.count({ where: { listId } })
 }
+
+export const moveCard = (id, data) =>{
+    return prisma.card.update({
+        where:{id},
+        data,
+        include:{
+            list:{ select: {boardId: true} },
+        },
+    });
+};

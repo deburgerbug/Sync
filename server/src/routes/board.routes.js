@@ -8,7 +8,7 @@ const router = express.Router()
 router.use(protect);
 
 router.post('/', createBoard);
-router.get('/workspace/:workspace', getBoardsByWorkspace);
+router.get('/workspace/:workspaceId', getBoardsByWorkspace);
 router.get('/:boardId', getBoardById);
 
 export default router;
