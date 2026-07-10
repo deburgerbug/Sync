@@ -70,3 +70,26 @@ export const moveCard = async({ cardId, listId, position, userId}) =>{
 
     return cardRepository.moveCard(cardId, {listId, position});
 };
+
+export const updateCard = async({cardId, userId, title, description }) =>{
+    const card = await cardRepository.findCardById(cardId)
+    if(!card) throw new AppError('Card Not Found', 404)
+
+    const list = await listRepository.findListById(card.listId)
+    const board = await boardRepository.findBoardById(list.boardId)
+    await workspaceService.verifyMembership(userId, board.workspaceId)
+
+    return cardRepository.updateCard(cardId, {title, description})
+};
+
+export const deleteCard = async({cardId, userId}) =>{
+    const card = await cardRepository.findCardById(cardId);
+    if(!card) throw new AppError('Card not Found', 404);
+
+    const list = await listRepository.findListById(card.listId);
+    const board = await boardRepository.findBoardById(list.boardId);
+    await workspaceService.verifyMembership(userId, board.workspaceId);
+    await cardRepository.deleteCard(cardId);
+    
+    return { boardId: board.id, listId: card.listId};
+};

@@ -40,3 +40,32 @@ export const getListById = async(req, res, next) =>{
         next(err);
     };
 };
+
+export const updateList = async(req, res, next) =>{
+    try{
+        const {listId} = req.params;
+        const {title}  = req.body;
+
+        const list = await listService.updateList({ listId, userId: req.user.id, title,})
+
+        const io = req.app.get('io');
+        io.to(list.boardId).emit('list:updated', {list});
+        req.status(200).json({ success:true, data:list})
+    }catch(err){
+        next(err);
+    }
+};
+
+export const deleteList = async(req, res, next) =>{
+    try{
+        const {listId} = req.params;
+        const {boardId}= await listService.deleteList({listId, userId: req.user.id});
+
+        const io = req.app.get('io');
+        io.to(boardId).emit('list:deleted', {listId})
+
+        res.status(200).json({ success:true });
+    }catch(err){
+        next(err);
+    }
+};

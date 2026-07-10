@@ -1,17 +1,13 @@
-import { useQuery } from '@tanstack/react-query'
+import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { useDroppable } from '@dnd-kit/core'
 import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable'
 import { getCardsByList } from '../../api/card.js'
 import CardItem from './CardItem.jsx'
+import { deleteList } from '../../api/list.js'
 
-export default function ListColumn({
-  list,
-  activeCardForm,
-  setActiveCardForm,
-  cardTitle,
-  setCardTitle,
-  handleCreateCard,
-}) {
+export default function ListColumn({ list, activeCardForm, setActiveCardForm, cardTitle, setCardTitle, handleCreateCard }) {
+  const queryClient = useQueryClient()
+
   const { data: cardsData } = useQuery({
     queryKey: ['cards', list.id],
     queryFn: () => getCardsByList(list.id),
@@ -23,11 +19,26 @@ export default function ListColumn({
     id: list.id,
     data: { listId: list.id },
   })
+  const handleDeleteList = async () => {
+    try {
+      await deleteList(list.id)
+      queryClient.invalidateQueries(['lists'])
+    } catch (err) {
+      console.error(err)
+    }
+  }
 
   return (
     <div className="w-72 shrink-0 bg-gray-100 rounded-lg p-3 shadow">
-      <h3 className="font-semibold text-gray-800 text-sm mb-3 px-1">{list.title}</h3>
-
+      <div className="flex justify-between items-center mb-3 px-1">
+        <h3 className="font-semibold text-gray-800 text-sm">{list.title}</h3>
+        <button
+          onClick={handleDeleteList}
+          className="text-gray-400 hover:text-red-500 text-xs opacity-0 group-hover:opacity-100 transition"
+        >
+          🗑️
+        </button>
+      </div>
       <SortableContext
         items={cards.map((c) => c.id)}
         strategy={verticalListSortingStrategy}

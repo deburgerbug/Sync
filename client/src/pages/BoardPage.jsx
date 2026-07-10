@@ -33,16 +33,13 @@ export default function BoardPage() {
   )
 
   useSocket(boardId, {
-    onCardCreated: ({ card }) => {
-      queryClient.invalidateQueries(['cards', card.listId])
-    },
-    onListCreated: () => {
-      queryClient.invalidateQueries(['lists', boardId])
-    },
-    onCardMoved: ({ cardId, listId, position }) => {
-      // Invalidate both the source and destination lists
-      queryClient.invalidateQueries(['cards'])
-    },
+    onCardCreated: ({ card }) => queryClient.invalidateQueries(['cards', card.listId]),
+    onListCreated: () => queryClient.invalidateQueries(['lists', boardId]),
+    onCardMoved: () => queryClient.invalidateQueries(['cards']),
+    onCardUpdated: ({ card }) => queryClient.invalidateQueries(['cards', card.listId]),
+    onCardDeleted: ({ listId }) => queryClient.invalidateQueries(['cards', listId]),
+    onListUpdated: () => queryClient.invalidateQueries(['lists', boardId]),
+    onListDeleted: () => queryClient.invalidateQueries(['lists', boardId]),
     onPresenceJoined: ({ user }) => {
       setPresence((prev) => {
         if (prev.find((u) => u.id === user.id)) return prev

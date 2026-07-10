@@ -1,3 +1,4 @@
+import { success } from 'zod';
 import * as cardService from '../services/card.service.js'
 import {createCardSchema} from '../validators/card.validator.js'
 
@@ -69,10 +70,7 @@ export const moveCard = async(req,res,next) =>{
         const {listId, position} = req.body
 
         const card = await cardService.moveCard({
-            cardId, 
-            listId,
-            position,
-            userId: req.user.id
+            cardId, listId, position, userId: req.user.id
         });
 
         const io = req.app.get('io');
@@ -84,3 +82,35 @@ export const moveCard = async(req,res,next) =>{
         next(err)
     }
 }
+
+export const updateCard = async(req, res, next) =>{
+    try{
+        const {cardId} = req.params;
+        const {title, description} = req.body;
+
+        const card = await cardService.updateCard({
+            cardId, userId: req.user.id, title, description
+        })
+        const io = req.app.get('io');
+        io.to(card.list.boardId).emit('card:updated', {card})
+
+        res.status(200).json({success:true, data:card})
+    }catch(err){
+        next(err)
+    }
+};
+
+export const deleteCard = async(req, res, next) =>{
+    try{
+        const {cardId} = req.params;
+        const {boardId, listId}= await cardService.deleteCard({
+            cardId, userId: req.user.id
+        });
+        const io = req.app.get('io');
+        io.to(boardId).emit('card:deleted', {cardId, listId});
+
+        res.status(200).json({success:true});
+    }catch(err){
+        next(err);
+    }
+};

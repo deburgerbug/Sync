@@ -32,3 +32,25 @@ export const getListById = async({ listId, userId }) =>{
     await workspaceService.verifyMembership(userId, board.workspaceId)
     return list;
 };
+
+export const updateList = async({listId, userId, title}) =>{
+    const list = await listRepository.findListById(userId);
+    if(!list) throw new AppError('List not found', 404);
+
+    const board = await boardRepository.findBoardById(list.boardId);
+    await workspaceService.verifyMembership(userId, board.workspaceId);
+
+    return listRepository.updateList(listId, {title})
+}
+
+export const deleteList = async({ listId, userId}) =>{
+    const list = await listRepository.findListById(listId);
+    if(!list) throw new AppError('List not Found !', 404);
+
+    const board = await boardRepository.findBoardById(list.boardId)
+    await workspaceService.verifyMembership(userId, board.workspaceId)
+
+    await listRepository.deleteList(listId)
+
+    return {boardId: board.id};
+}
