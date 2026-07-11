@@ -16,6 +16,7 @@ import ListColumn from '../components/board/ListColumn.jsx'
 import ArchivedCardItem from '../components/board/ArchivedCardItem.jsx'
 
 export default function BoardPage() {
+  
   const { boardId } = useParams()
   const { user, logout } = useAuth()
   const navigate = useNavigate()

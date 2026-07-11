@@ -131,7 +131,7 @@ export const archiveCard = async(req, res, next) =>{
 
 export const unarchiveCard = async(req, res, next) =>{
     try{
-        const {boardId} = req.params;
+        const {cardId} = req.params;
         const card = await cardService.unarchiveCard({ cardId, userId: req.user.id})
 
         const io = req.app.get('io')
