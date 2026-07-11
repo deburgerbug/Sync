@@ -7,12 +7,12 @@ const router = express.Router()
 router.use(protect);
 
 router.post('/', createCard)
-router.get('/:cardId', getCardById)
 router.get('/list/:listId', getCardByListId)
+router.get('/board/:boardId/archived', getArchivedCards)
 router.patch('/:cardId/move', moveCard)
-router.patch('/:cardId', updateCard)
-router.delete('/:cardId',deleteCard)
 router.patch('/:cardId/archive', archiveCard)
 router.patch('/:cardId/unarchive', unarchiveCard)
-router.get('/board/:boardId/archived', getArchivedCards)
+router.patch('/:cardId', updateCard)
+router.delete('/:cardId',deleteCard)
+router.get('/:cardId', getCardById)
 export default router;
