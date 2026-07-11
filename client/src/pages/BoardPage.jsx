@@ -11,8 +11,9 @@ import {
 import { useAuth } from '../context/AuthContext.jsx'
 import { useSocket } from '../hooks/useSocket.js'
 import { getListsByBoard, createList } from '../api/list.js'
-import { createCard, moveCard } from '../api/card.js'
+import { createCard, moveCard, getArchiveCards } from '../api/card.js'
 import ListColumn from '../components/board/ListColumn.jsx'
+import ArchivedCardItem from '../components/board/ArchivedCardItem.jsx'
 
 export default function BoardPage() {
   const { boardId } = useParams()
@@ -25,10 +26,11 @@ export default function BoardPage() {
   const [activeCardForm, setActiveCardForm] = useState(null)
   const [cardTitle, setCardTitle] = useState('')
   const [presence, setPresence] = useState([])
+  const [showArchived, setShowArchived] = useState(false)
 
   const sensors = useSensors(
     useSensor(PointerSensor, {
-      activationConstraint: { distance: 5 }, // 5px drag before activating
+      activationConstraint: { distance: 5 },
     })
   )
 
@@ -40,6 +42,8 @@ export default function BoardPage() {
     onCardDeleted: ({ listId }) => queryClient.invalidateQueries(['cards', listId]),
     onListUpdated: () => queryClient.invalidateQueries(['lists', boardId]),
     onListDeleted: () => queryClient.invalidateQueries(['lists', boardId]),
+    onCardArchived: ({ listId }) => queryClient.invalidateQueries(['cards', listId]),
+    onCardUnarchived: ({ card }) => queryClient.invalidateQueries(['cards', card.listId]),
     onPresenceJoined: ({ user }) => {
       setPresence((prev) => {
         if (prev.find((u) => u.id === user.id)) return prev
@@ -56,28 +60,26 @@ export default function BoardPage() {
     queryFn: () => getListsByBoard(boardId),
   })
 
+  const { data: archivedData } = useQuery({
+    queryKey: ['cards', boardId, 'archived'],
+    queryFn: () => getArchiveCards(boardId),
+    enabled: showArchived,
+  })
+
   const lists = listsData?.data?.data || []
+  const archivedCards = archivedData?.data?.data || []
 
   const handleDragEnd = async (event) => {
     const { active, over } = event
-
-    if (!over) return // dropped outside a droppable
+    if (!over) return
 
     const cardId = active.id
-    const overId = over.id // could be a listId or another cardId
-
-    // Find which list the card was dragged over
-    // over.id is the listId when dropped on empty list,
-    // or a cardId when dropped on another card
-    const targetListId = over.data?.current?.listId || overId
-
+    const targetListId = over.data?.current?.listId || over.id
     if (!targetListId) return
 
-    // Find position — simple approach: drop at end of list
     const targetCards = queryClient.getQueryData(['cards', targetListId])
     const position = targetCards?.data?.data?.length ?? 0
 
-    // Optimistic update — move card in UI instantly
     queryClient.setQueryData(['cards', targetListId], (old) => {
       if (!old) return old
       const card = active.data?.current?.card
@@ -93,7 +95,6 @@ export default function BoardPage() {
 
     try {
       await moveCard(cardId, { listId: targetListId, position })
-      // Refresh both lists after server confirms
       queryClient.invalidateQueries(['cards'])
     } catch (err) {
       console.error('Move failed:', err)
@@ -129,6 +130,7 @@ export default function BoardPage() {
 
   return (
     <div className="min-h-screen bg-blue-700 flex flex-col">
+      {/* Navbar */}
       <nav className="px-6 py-3 flex justify-between items-center bg-blue-800">
         <div className="flex items-center gap-4">
           <button
@@ -140,6 +142,7 @@ export default function BoardPage() {
           <span className="text-white font-semibold">Board</span>
         </div>
         <div className="flex items-center gap-3">
+          {/* Presence indicators */}
           {presence.map((u) => (
             <div
               key={u.id}
@@ -149,13 +152,52 @@ export default function BoardPage() {
               {u.name[0].toUpperCase()}
             </div>
           ))}
+
+          {/* Archived toggle */}
+          <button
+            onClick={() => setShowArchived(!showArchived)}
+            className={`text-sm px-3 py-1 rounded transition ${
+              showArchived
+                ? 'bg-blue-600 text-white'
+                : 'text-blue-200 hover:text-white'
+            }`}
+          >
+            📦 Archived
+          </button>
+
           <span className="text-blue-200 text-sm">{user?.name}</span>
-          <button onClick={logout} className="text-blue-300 hover:text-white text-sm">
+          <button
+            onClick={logout}
+            className="text-blue-300 hover:text-white text-sm"
+          >
             Logout
           </button>
         </div>
       </nav>
 
+      {/* Archived panel */}
+      {showArchived && (
+        <div className="bg-blue-900 px-6 py-4 border-b border-blue-700">
+          <h3 className="text-white font-semibold text-sm mb-3">
+            Archived Cards ({archivedCards.length})
+          </h3>
+          {archivedCards.length === 0 ? (
+            <p className="text-blue-300 text-sm">No archived cards.</p>
+          ) : (
+            <div className="flex flex-wrap gap-2">
+              {archivedCards.map((card) => (
+                <ArchivedCardItem
+                  key={card.id}
+                  card={card}
+                  boardId={boardId}
+                />
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Board content */}
       <div className="flex-1 overflow-x-auto p-6">
         {isLoading ? (
           <p className="text-white">Loading board...</p>

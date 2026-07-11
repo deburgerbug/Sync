@@ -14,5 +14,5 @@ router.patch('/:cardId', updateCard)
 router.delete('/:cardId',deleteCard)
 router.patch('/:cardId/archive', archiveCard)
 router.patch('/:cardId/unarchive', unarchiveCard)
-router.get('/baord/:boardId/archived', getArchivedCards)
+router.get('/board/:boardId/archived', getArchivedCards)
 export default router;

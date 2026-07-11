@@ -7,7 +7,7 @@ import { deleteList } from '../../api/list.js'
 
 export default function ListColumn({ list, activeCardForm, setActiveCardForm, cardTitle, setCardTitle, handleCreateCard }) {
   const queryClient = useQueryClient()
-
+  const isDoneList = list.title.toLowerCase() === "done"
   const { data: cardsData } = useQuery({
     queryKey: ['cards', list.id],
     queryFn: () => getCardsByList(list.id),
@@ -15,6 +15,11 @@ export default function ListColumn({ list, activeCardForm, setActiveCardForm, ca
 
   const cards = cardsData?.data?.data || []
 
+  {
+    cards.map((card) => (
+      <CardItem key={card.id} card={card} listId={list.id} isDoneList={isDoneList} ></CardItem>
+    ))
+  }
   const { setNodeRef } = useDroppable({
     id: list.id,
     data: { listId: list.id },
@@ -31,7 +36,9 @@ export default function ListColumn({ list, activeCardForm, setActiveCardForm, ca
   return (
     <div className="w-72 shrink-0 bg-gray-100 rounded-lg p-3 shadow">
       <div className="flex justify-between items-center mb-3 px-1">
-        <h3 className="font-semibold text-gray-800 text-sm">{list.title}</h3>
+        <h3 className={`font-semibold text-sm ${isDoneList ? 'text-green-600' : 'text-gray-800'}`}>
+          {list.title} {isDoneList && '✓'}
+        </h3>
         <button
           onClick={handleDeleteList}
           className="text-gray-400 hover:text-red-500 text-xs opacity-0 group-hover:opacity-100 transition"

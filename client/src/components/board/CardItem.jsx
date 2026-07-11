@@ -2,9 +2,9 @@ import { useState } from 'react'
 import { useSortable } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
 import { useQueryClient } from '@tanstack/react-query'
-import { updateCard, deleteCard } from '../../api/card.js'
+import { updateCard, archiveCard } from '../../api/card.js'
 
-export default function CardItem({ card, listId }) {
+export default function CardItem({ card, listId, isDoneList }) {
   const queryClient = useQueryClient()
   const [isEditing, setIsEditing] = useState(false)
   const [title, setTitle] = useState(card.title)
@@ -39,9 +39,9 @@ export default function CardItem({ card, listId }) {
     }
   }
 
-  const handleDelete = async () => {
+  const handleArchive = async () => {
     try {
-      await deleteCard(card.id)
+      await archiveCard(card.id)
       queryClient.invalidateQueries(['cards', listId])
     } catch (err) {
       console.error(err)
@@ -83,10 +83,14 @@ export default function CardItem({ card, listId }) {
       style={style}
       {...attributes}
       {...listeners}
-      className="bg-white rounded p-3 shadow-sm text-sm text-gray-800 cursor-grab active:cursor-grabbing hover:shadow-md transition group"
+      className={`bg-white rounded p-3 shadow-sm text-sm cursor-grab active:cursor-grabbing hover:shadow-md transition group
+        ${isDoneList ? 'border-l-4 border-green-400' : ''}
+      `}
     >
       <div className="flex justify-between items-start">
-        <span>{card.title}</span>
+        <span className={`text-gray-800 ${isDoneList ? 'line-through text-gray-400' : ''}`}>
+          {card.title}
+        </span>
         <div className="hidden group-hover:flex gap-1 ml-2">
           <button
             onClick={(e) => { e.stopPropagation(); setIsEditing(true); }}
@@ -95,10 +99,11 @@ export default function CardItem({ card, listId }) {
             ✏️
           </button>
           <button
-            onClick={(e) => { e.stopPropagation(); handleDelete(); }}
-            className="text-gray-400 hover:text-red-500 text-xs"
+            onClick={(e) => { e.stopPropagation(); handleArchive(); }}
+            className="text-gray-400 hover:text-orange-500 text-xs"
+            title="Archive card"
           >
-            🗑️
+            📦
           </button>
         </div>
       </div>
