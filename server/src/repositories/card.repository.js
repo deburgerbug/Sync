@@ -74,7 +74,7 @@ export const getArchivedCardsByBoardId = (boardId) =>{
     return prisma.card.findMany({
         where:{
             archived: true,
-            list: listId
+            list: { boardId }
         },
         include:{list: {select: {title:true, boardId: true}}},
         orderBy:{createdAt: 'desc'}
