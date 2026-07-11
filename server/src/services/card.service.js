@@ -93,3 +93,34 @@ export const deleteCard = async({cardId, userId}) =>{
     
     return { boardId: board.id, listId: card.listId};
 };
+
+export const archiveCard = async({cardId, userId}) =>{
+    const card = await cardRepository.findCardById(cardId)
+    if(!card) throw new AppError('Card not found', 404)
+    const list = await listRepository.findListById(card.listId)
+    const board = await boardRepository.findBoardById(list.boardId)
+
+    await workspaceService.verifyMembership(userId, board.workspaceId)
+
+    return cardRepository.archiveCard(cardId)
+}
+
+export const unarchiveCard = async({cardId, userId}) =>{
+    const card = await cardRepository.findBoardById(cardId)
+    if(!card) throw new AppError('Card not found', 404);
+
+    const list = await listRepository.findListById(card.listId);
+    const board = await boardRepository.findBoardById(list.boardId)
+    await workspaceService.verifyMembership(userId, board.workspaceId)
+
+    return cardRepository.unarchiveCard(cardId)
+}
+
+export const getArchivedCards = async({cardId, userId}) =>{
+    const board = await boardRepository.findBoardById(boardId)
+    if(!board) throw new AppError('Board not found', 404);
+    
+    await workspaceService.verifyMembership(userId, board.workspaceId);
+
+    return cardRepository.findArchivedCardsByBoardId(boardId)
+}

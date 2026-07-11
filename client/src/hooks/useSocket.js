@@ -27,6 +27,8 @@ export const useSocket = (boardId, handlers = {}) => {
     const onCardDeleted = (data) =>handlersRef.current.onCardDeleted?.(data)
     const onListUpdated = (data) => handlersRef.current.onListUpdated?.(data)
     const onListDeleted = (data) => handlersRef.current.onListDeleted?.(data)
+    const onCardArchived = (data) => handlersRef.current.onCardArchived?.(data)
+    const onCardUnarchived = (data) => handlersRef.current.onUnarchived?.(data)
 
     socket.on('card:created', onCardCreated)
     socket.on('list:created', onListCreated)
@@ -37,6 +39,8 @@ export const useSocket = (boardId, handlers = {}) => {
     socket.on('card:deleted', onCardDeleted)
     socket.on('list:updated', onListUpdated)
     socket.on('list:deleted', onListDeleted)
+    socket.on('card:archived',onCardArchived)
+    socket.on('card:unarchived', onCardUnarchived)
 
     return () => {
       socket.emit('board:leave', { boardId })
@@ -48,7 +52,9 @@ export const useSocket = (boardId, handlers = {}) => {
       socket.off('card:deleted', onCardDeleted)
       socket.off('list:updated', onListUpdated)
       socket.off('list:list', onListDeleted)
+      socket.off('card:archived', onCardArchived)
+      socket.off('card:unarchived', onCardUnarchived)
       socket.disconnect()
     }
-  }, [boardId, token]) // ✅ only re-run when boardId or token changes
+  }, [boardId, token]) //  only re-run when boardId or token changes
 }

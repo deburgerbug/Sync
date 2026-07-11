@@ -114,3 +114,42 @@ export const deleteCard = async(req, res, next) =>{
         next(err);
     }
 };
+
+export const archiveCard = async(req, res, next) =>{
+    try{
+        const {cardId} = req.params;
+        const card = await cardService.archiveCard({cardId, userId: req.user.id})
+
+        const io = req.app.get('io')
+        io.to(card.list.boardId).emit('card:archived', { cardId, listId: card.listId})
+
+        res.status(200).json({success:true, data:card})
+    }catch(err){
+        next(err);
+    }
+};
+
+export const unarchiveCard = async(req, res, next) =>{
+    try{
+        const {boardId} = req.params;
+        const card = await cardService.unarchiveCard({ cardId, userId: req.user.id})
+
+        const io = req.app.get('io')
+        io.to(card.list.boardId).emit('card:unarchived', {card});
+
+        res.status(200).json({ success:true, data:card });
+    }catch(err){
+        next(err);
+    }
+};
+
+export const getArchivedCards = async(req, res, next) =>{
+    try{
+        const { boardId } = req.params;
+        const cards = await cardService.getArchivedCards({ boardId, userId: req.user.id});
+
+        res.status(200).json({ success:true, data:cards});
+    }catch(err){
+        next(err)
+    }
+}

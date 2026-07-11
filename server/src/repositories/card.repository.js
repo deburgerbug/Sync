@@ -9,8 +9,14 @@ export const createCard = (data) => {
     })
 }
 
-export const findCardByListId = (listId) => {
-    return prisma.card.findMany({ where: { listId }, orderBy: { position: 'asc' } })
+export const findCardByListId = (listId, includeArchived= false) => {
+    return prisma.card.findMany({
+    where: {
+      listId,
+      ...(includeArchived ? {} : { archived: false }),
+        },
+    orderBy: { position: 'asc' },
+    });
 }
 
 export const findCardById = (id) => {
@@ -47,3 +53,30 @@ export const moveCard = (id, data) =>{
         },
     });
 };
+
+export const archiveCard = (id) =>{
+    return prisma.card.update({
+        where: {id},
+        data: {archived:true},
+        include: {list: {select: {boardId:true}}}
+    });
+};
+
+export const unarchiveCard = (id) =>{
+    return prisma.card.update({
+        where:{id},
+        data: {archived:false},
+        include: {list: {select: {boardId:true}}}
+    });
+};
+
+export const getArchivedCardsByBoardId = (boardId) =>{
+    return prisma.card.findMany({
+        where:{
+            archived: true,
+            list: listId
+        },
+        include:{list: {select: {title:true, boardId: true}}},
+        orderBy:{createdAt: 'desc'}
+    });
+}

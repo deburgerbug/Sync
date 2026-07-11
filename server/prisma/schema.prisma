@@ -1,101 +1,84 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Get a free hosted Postgres database in seconds: `npx create-db`
-
 generator client {
   provider = "prisma-client-js"
   output   = "../generated/prisma"
 }
 
 datasource db {
-  provider     = "postgresql"
-  
+  provider = "postgresql"
 }
 
 model User {
-  id                String @id @default(uuid())
-  name              String  
-  email             String   @unique
-  password          String 
-  avatarUrl         String?
-  createdAt         DateTime @default(now())
-
-  memberships       WorkspaceMember[]
-  comments          Comment[]
+  id          String            @id @default(uuid())
+  name        String
+  email       String            @unique
+  password    String
+  avatarUrl   String?
+  createdAt   DateTime          @default(now())
+  comments    Comment[]
+  memberships WorkspaceMember[]
 }
 
-
-model Workspace{
-  id                String  @id @default(uuid())
-  name              String
-  createdAt         DateTime @default(now())
-
-  members          WorkspaceMember[]
-  boards            Board[]
-
+model Workspace {
+  id        String            @id @default(uuid())
+  name      String
+  createdAt DateTime          @default(now())
+  boards    Board[]
+  members   WorkspaceMember[]
 }
 
-model WorkspaceMember{
-  id              String @id @default(uuid())
-  role            Role   @default(EDITOR)
-  userId          String 
-  workspaceId     String
+model WorkspaceMember {
+  id          String    @id @default(uuid())
+  role        Role      @default(EDITOR)
+  userId      String
+  workspaceId String
+  user        User      @relation(fields: [userId], references: [id])
+  workspace   Workspace @relation(fields: [workspaceId], references: [id])
 
-  user            User          @relation(fields:[userId], references: [id])
-  workspace       Workspace     @relation(fields:[workspaceId], references: [id])
+  @@unique([userId, workspaceId])
+}
 
-  @@unique ([userId, workspaceId])
-} 
+model Board {
+  id          String    @id @default(uuid())
+  title       String
+  workspaceId String
+  createdAt   DateTime  @default(now())
+  workspace   Workspace @relation(fields: [workspaceId], references: [id])
+  list        List[]
+}
 
+model List {
+  id       String @id @default(uuid())
+  title    String
+  position Int
+  boardId  String
+  cards    Card[]
+  board    Board  @relation(fields: [boardId], references: [id])
+}
+
+model Card {
+  id          String    @id @default(uuid())
+  title       String
+  description String?
+  position    Int
+  listId      String
+  archived    Boolean @default(false) 
+  createdAt   DateTime  @default(now())
+  list        List      @relation(fields: [listId], references: [id])
+  comments    Comment[]
+}
+
+model Comment {
+  id        String   @id @default(uuid())
+  text      String
+  cardId    String
+  userId    String
+  createdAt DateTime @default(now())
+  card      Card     @relation(fields: [cardId], references: [id])
+  user      User     @relation(fields: [userId], references: [id])
+}
 
 enum Role {
   OWNER
   EDITOR
   VIEWER
-}
-
-model Board{
-  id                  String @id @default(uuid())
-  title               String
-  workspaceId         String
-  createdAt           DateTime @default(now())
-
-  workspace           Workspace @relation(fields: [workspaceId], references:[id]) 
-  list                List[]
-
-}
-
-model List{
-  id          String @id @default(uuid())
-  title       String 
-  position    Int
-  boardId     String
-  board       Board @relation(fields:[boardId], references:[id])
-
-  cards       Card[]
-}
-
-model Card{
-  id                     String @id @default(uuid())
-  title                  String
-  description            String?
-  position               Int
-  listId                 String
-  createdAt              DateTime @default(now())
-
-  list List              @relation(fields:[listId], references:[id])
-  comments               Comment[]
-}
-
-
-model Comment{
-  id String @id @default(uuid())
-  text            String
-  cardId          String
-  userId          String
-  createdAt       DateTime @default(now())
-
-  card            Card @relation(fields: [cardId], references:[id])
-  user            User @relation(fields: [userId], references:[id])
 }

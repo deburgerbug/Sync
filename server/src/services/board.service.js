@@ -1,10 +1,13 @@
 import * as boardRepository from '../repositories/board.repository.js';
 import * as workspaceService from '../services/workspace.service.js';
+import * as listRepository from '../repositories/list.repository.js'
 import AppError from '../utils/AppError.js';
 
 export const createBoard = async ({ title, workspaceId, userId }) => {
   await workspaceService.verifyMembership(userId, workspaceId);
-  return boardRepository.createBoard({ title, workspaceId });
+
+  const board = await boardRepository.createBoard({title, workspaceId})
+  return board
 };
 
 export const getBoardsByWorkspace = async ({ workspaceId, userId }) => {
